@@ -1,14 +1,4 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.impute import SimpleImputer
-
-
-import torch
-from torch.utils.data import DataLoader, TensorDataset
 
 
 data = pd.read_csv("data/WA_Fn-UseC_-Telco-Customer-Churn.csv")

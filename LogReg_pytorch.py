@@ -1,19 +1,5 @@
 import torch
 
-### Model
-# class LogisticRegression_torch(torch.nn.Module):
-#     def __init__(self, x_dim, y_dim=1):
-#         super().__init__()
-#         self.x_dim = x_dim
-#         self.y_dim = y_dim
-#         self.model = torch.nn.Linear(x_dim, y_dim)
-#
-#     def forward(self, x):
-#         y_pred = torch.sigmoid(self.model(x))
-#         return y_pred
-
-
-#### this might be beneficial, as the labels in my data are already 0-1
 class LogisticRegression_torch(torch.nn.Module):
     def __init__(self, x_dim, y_dim=1):
         super().__init__()
