@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 
 
@@ -111,7 +110,7 @@ class LogReg_Linear_from_scratch():
 
     def step(self, grad_A, grad_B, learning_rate):
         self.A -= learning_rate * grad_A
-        self.B -= -learning_rate * grad_B
+        self.B -= learning_rate * grad_B
 
     def fit(self, X, Y, epochs, lr):
         X_dim = X.shape[1]
