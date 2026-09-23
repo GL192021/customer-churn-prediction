@@ -35,11 +35,10 @@ def train_torch_model(X_train, Y_train, input_dim, class_weight: dict=None):
         criterion = torch.nn.BCEWithLogitsLoss()
     else:
         w_0, w_1 = class_weight[0], class_weight[1]
-        weights = torch.tensor([
-            w_0,  # class 0
-            w_1,  # class 1
-        ])
-        criterion = torch.nn.BCEWithLogitsLoss(pos_weight=weights)
+
+        weight = torch.tensor(w_1 / w_0, dtype=torch.float32)
+
+        criterion = torch.nn.BCEWithLogitsLoss(pos_weight=weight)
 
 
     losses = []
@@ -111,7 +110,7 @@ def main():
         y_probas_test_class_1_torch = np.array(y_probas_test_class_1_torch)
 
     accuracy_torch, balanced_accuracy_torch, precision__minority_torch, recall__minority_torch, f1__minority_torch = model_stat_metrics(Y_test, y_probas_test_class_1_torch, mdl_name='TORCH', print_bool=True)
-    best_t_torch = threshold_calib(Y_val_torch, y_probas_val_class_1_torch)
+    best_t_torch = threshold_calib(Y_val, y_probas_val_class_1_torch)
 
     accuracy_torch_t, balanced_accuracy_torch_t, precision__minority_torch_t, recall__minority_torch_t, f1__minority_torch_t = model_stat_metrics(Y_test, y_probas_test_class_1_torch, t=best_t_torch, mdl_name='TORCH', print_bool=True)
 
@@ -188,12 +187,12 @@ def main():
         y_probas_test_class_1_torch_w = np.array(y_probas_test_class_1_torch_w)
 
     accuracy_torch_w, balanced_accuracy_torch_w, precision__minority_torch_w, recall__minority_torch_w, f1__minority_torch_w = model_stat_metrics(Y_test, y_probas_test_class_1_torch_w, mdl_name='TORCH-1/3_weights', print_bool=True)
-    best_t_torch_w = threshold_calib(Y_val_torch, y_probas_val_class_1_torch_w)
+    best_t_torch_w = threshold_calib(Y_val, y_probas_val_class_1_torch_w)
 
     accuracy_torch_w__t, balanced_accuracy_torch_w__t, precision__minority_torch_w__t, recall__minority_torch_w__t, f1__minority_torch_w__t = model_stat_metrics(Y_test, y_probas_test_class_1_torch_w, t=best_t_torch_w, mdl_name='TORCH-1/3_weights', print_bool=True)
 
-    statistics["torch_smote"] = {"acc": accuracy_torch_w, "bal_acc": balanced_accuracy_torch_w, "prec_minor": precision__minority_torch_w, "recall_minor": recall__minority_torch_w, "f_1_minor": f1__minority_torch_w}
-    statistics["torch_smote_t"] = {"acc": accuracy_torch_w__t, "bal_acc": balanced_accuracy_torch_w__t, "prec_minor": precision__minority_torch_w__t, "recall_minor": recall__minority_torch_w__t, "f_1_minor": f1__minority_torch_w__t}
+    statistics["torch_w"] = {"acc": accuracy_torch_w, "bal_acc": balanced_accuracy_torch_w, "prec_minor": precision__minority_torch_w, "recall_minor": recall__minority_torch_w, "f_1_minor": f1__minority_torch_w}
+    statistics["torch_w__t"] = {"acc": accuracy_torch_w__t, "bal_acc": balanced_accuracy_torch_w__t, "prec_minor": precision__minority_torch_w__t, "recall_minor": recall__minority_torch_w__t, "f_1_minor": f1__minority_torch_w__t}
 
 
 
@@ -226,7 +225,7 @@ def main():
     smote = SMOTE(random_state=42)
 
     X_train_smote, Y_train_smote = smote.fit_resample(X_train, Y_train)
-    X_train_torch_smote, Y_train_torch_smote = torch.tensor(X_train_smote), torch.tensor(Y_train_smote)
+    X_train_torch_smote, Y_train_torch_smote = torch.tensor(X_train_smote.values, dtype=torch.float32), torch.tensor(Y_train_smote.values, dtype=torch.float32)
 
 
     print("\nBefore SMOTE:")
@@ -245,10 +244,10 @@ def main():
 
     best_t__basic_smote = threshold_calib(Y_val, y_probas_validation__basic_smote)
 
-    accuracy_basic_smote__t, balanced_accuracy_basic_smote, precision__minority_basic_smote, recall__minority_basic_smote, f1__minority_basic_smote = model_stat_metrics(Y_test, y_probas_test__basic_smote,t=best_t__basic_smote, mdl_name="BASIC-SMOTE", print_bool=True)
+    accuracy_basic_smote__t, balanced_accuracy_basic_smote__t, precision__minority_basic_smote__t, recall__minority_basic_smote__t, f1__minority_basic_smote__t = model_stat_metrics(Y_test, y_probas_test__basic_smote,t=best_t__basic_smote, mdl_name="BASIC-SMOTE", print_bool=True)
 
     statistics["basic_smote"] = {"acc": accuracy_basic_smote, "bal_acc": balanced_accuracy_basic_smote, "prec_minor": precision__minority_basic_smote, "recall_minor": recall__minority_basic_smote, "f_1_minor": f1__minority_basic_smote}
-    statistics["basic_smote__t"] = {"acc": accuracy_basic_smote__t, "bal_acc": balanced_accuracy_basic_smote, "prec_minor": precision__minority_basic_smote, "recall_minor": recall__minority_basic_smote, "f_1_minor": f1__minority_basic_smote}
+    statistics["basic_smote__t"] = {"acc": accuracy_basic_smote__t, "bal_acc": balanced_accuracy_basic_smote__t, "prec_minor": precision__minority_basic_smote__t, "recall_minor": recall__minority_basic_smote__t, "f_1_minor": f1__minority_basic_smote__t}
 
 
 
@@ -265,7 +264,7 @@ def main():
         y_probas_test_class_1_torch_smote = np.array(y_probas_test_class_1_torch_smote)
 
     accuracy_torch_smote, balanced_accuracy_torch_smote, precision__minority_torch_smote, recall__minority_torch_smote, f1__minority_torch_smote = model_stat_metrics(Y_test, y_probas_test_class_1_torch_smote, mdl_name='TORCH-SMOTE', print_bool=True)
-    best_t_torch_smote = threshold_calib(Y_val_torch, y_probas_val_class_1_torch_smote)
+    best_t_torch_smote = threshold_calib(Y_val, y_probas_val_class_1_torch_smote)
 
     accuracy_torch_smote__t, balanced_accuracy_torch_smote__t, precision__minority_torch_smote__t, recall__minority_torch_smote__t, f1__minority_torch_smote__t = model_stat_metrics(Y_test, y_probas_test_class_1_torch_smote, t=best_t_torch_smote, mdl_name='TORCH-SMOTE', print_bool=True)
 
@@ -280,7 +279,7 @@ def main():
     y_logits_test_class_1__scratch_smote = scratch_model_smote.forward(X_test)
     y_probas_test_class_1__scratch_smote = scratch_model_smote.get_prob_class_1_from_logits_from_scratch(y_logits_test_class_1__scratch_smote)
 
-    accuracy_scratch_smote, balanced_accuracy_scratch_smote, precision__minority_scratch_smote, recall__minority_scratch_smote, f1__minority_scratch_smote = model_stat_metrics(Y_test, y_probas_test_class_1__scratch_smote, mdl_name="SCRATCH-1/3-weights", print_bool=True)
+    accuracy_scratch_smote, balanced_accuracy_scratch_smote, precision__minority_scratch_smote, recall__minority_scratch_smote, f1__minority_scratch_smote = model_stat_metrics(Y_test, y_probas_test_class_1__scratch_smote, mdl_name="SCRATCH-SMOTE", print_bool=True)
 
     y_logits_val_class_1_scratch_smote = scratch_model_smote.forward(X_val)
     y_probas_val_class_1_scratch_smote = scratch_model_smote.get_prob_class_1_from_logits_from_scratch(

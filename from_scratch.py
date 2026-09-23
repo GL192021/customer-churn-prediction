@@ -91,8 +91,14 @@ class LogReg_Linear_from_scratch():
 
         batch = len(y)
 
-        grad_a = -(x.T @ (y - p_hats) / batch)
-        grad_b = -(np.sum(y - p_hats) / batch)
+        if self.binary_class_weight is None:
+            grad_a = -(x.T @ (y - p_hats) / batch)
+            grad_b = -(np.sum(y - p_hats) / batch)
+        else:
+            w_0, w_1 = self.binary_class_weight[0], self.binary_class_weight[1]
+            weights = np.where(y==1, w_1, w_0)
+            grad_a = -(x.T @ (weights*(y - p_hats)) / batch)
+            grad_b = -(np.sum(weights*(y - p_hats)) / batch)
 
         return grad_a, grad_b
 
