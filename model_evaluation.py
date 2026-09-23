@@ -1,8 +1,15 @@
 
 
-def model_eval(Y_real, y_probas_class_1, t=0.5, after_thr_calib=False, print_bool=False, mdl_name=None):
+def model_stat_metrics(Y_real, y_probas_class_1, t=None, print_bool=False, mdl_name=None):
     eps = 1e-12
-    y_preds = (y_probas_class_1 >= t).astype(int)
+
+    after_thr_calib = False
+    if t is None:
+        y_preds = (y_probas_class_1 >= 0.5).astype(int)
+    else:
+        y_preds = (y_probas_class_1 >= t).astype(int)
+        after_thr_calib = True
+
     TP = ((Y_real == 1) & (y_preds == 1)).sum().item()
     FP = ((Y_real == 0) & (y_preds == 1)).sum().item()
     TN = ((Y_real == 0) & (y_preds == 0)).sum().item()
@@ -18,15 +25,15 @@ def model_eval(Y_real, y_probas_class_1, t=0.5, after_thr_calib=False, print_boo
         print("")
         print("=" * 100)
         if mdl_name:
-            print("Model ", mdl_name)
+            print("Model :  ", mdl_name)
         if after_thr_calib:
             print('Evaluation on test set AFTER threshold calibration')
             print('Calibration criterion: F1 maximization')
         print(f"Accuracy:           {accuracy:.3%}")
         print(f"Balanced Accuracy:  {balanced_accuracy:.3%}")
-        print(f"Precision (class 1-minority):{precision__minority_Yes_1:.3%}")
-        print(f"Recall (class 1-minority):   {recall__minority_Yes_1:.3%}")
-        print(f"F1 score (class 1-minority): {f1__minority_Yes_1:.3%}")
+        print(f"Precision (class 1-minority):  {precision__minority_Yes_1:.3%}")
+        print(f"Recall (class 1-minority):     {recall__minority_Yes_1:.3%}")
+        print(f"F1 score (class 1-minority):   {f1__minority_Yes_1:.3%}")
         print("=" * 100)
         print("")
     return accuracy, balanced_accuracy, precision__minority_Yes_1, recall__minority_Yes_1, f1__minority_Yes_1
@@ -41,7 +48,7 @@ def threshold_calib(Y_real, y_prob_minority, print_bool=False):
     eps = 1e-12
 
     for t in candidate_thresholds:
-        accuracy, balanced_accuracy, precision__minority_Yes_1, recall__minority_Yes_1, f1__minority_Yes_1 = model_eval(Y_real, y_prob_minority, t=t, print_bool=False)
+        accuracy, balanced_accuracy, precision__minority_Yes_1, recall__minority_Yes_1, f1__minority_Yes_1 = model_stat_metrics(Y_real, y_prob_minority, t=t, print_bool=False)
 
         if f1__minority_Yes_1 > best_f1:
             best_f1 = f1__minority_Yes_1

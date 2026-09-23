@@ -18,9 +18,10 @@ class LogReg_Linear_from_scratch():
                                 grad_A     (d,)
                                 grad_B     scalar
     '''
-    def __init__(self):
+    def __init__(self, binary_class_weight: dict=None):
         self.A = None
         self.B = None
+        self.binary_class_weight = binary_class_weight
         self.losses = []
 
 
@@ -102,8 +103,17 @@ class LogReg_Linear_from_scratch():
 
         batch = len(y)
 
-        grad_a = -(x.T @ (y - p_hats) / batch)
-        grad_b = -(np.sum(y - p_hats) / batch)
+
+        if self.binary_class_weight is None:
+            grad_a = -(x.T @ (y - p_hats) / batch)
+            grad_b = -(np.sum(y - p_hats) / batch)
+        else:
+            w_0, w_1 = self.binary_class_weight[0], self.binary_class_weight[1]
+            weights = np.where(y==1, w_1, w_0)
+            grad_a = -(x.T @ (weights*(y - p_hats)) / batch)
+            grad_b = -(np.sum(weights*(y - p_hats)) / batch)
+
+
 
         return grad_a, grad_b
 
@@ -116,6 +126,7 @@ class LogReg_Linear_from_scratch():
         X_dim = X.shape[1]
         self.A = np.zeros(X_dim)
         self.B = 0.0
+        self.losses = []
 
         for epoch in range(epochs):
             logits = self.forward(X)

@@ -13,8 +13,8 @@ fixed_binary_dicts = {
     "female-male": {"Female": 1, "Male": 0}
 }
 
-
-def to_num_cols(df: pd.DataFrame, binary_lst: list, non_binary_lst: list, str_num_cols: list):
+## helpers
+def to_num_cols(df: pd.DataFrame, binary_lst: list, non_binary_lst: list, str_num_cols: list) -> pd.DataFrame:
     '''
     After understanding the basic stucture of the data:
         Numerical strings to Numbers (if they exist)
@@ -43,7 +43,8 @@ def to_num_cols(df: pd.DataFrame, binary_lst: list, non_binary_lst: list, str_nu
     return dataset
 
 
-def basic_preprocess_data(df: pd.DataFrame):
+def basic_preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
+    """Apply dataset-specific categorical and numerical preprocessing."""
 
     dataset = df.copy()
 
@@ -88,8 +89,14 @@ def basic_preprocess_data(df: pd.DataFrame):
 
 
 
-
+## main preprocessing
 def prepare_for_training(df: pd.DataFrame, Y_col: str, pytorch_bool: bool = False, check_imbalance: bool = False, stratify: bool = True, test_size: float = 0.2, val_size: float = 0.25, random_state: int = 42):
+    """
+    Preprocess, split, impute, and standardize the dataset.
+
+    The imputer and scaler are fitted only on the training set and then applied
+    to the validation and test sets.
+    """
     dataset = df.copy()
 
     dataset_prepr = basic_preprocess_data(dataset)
